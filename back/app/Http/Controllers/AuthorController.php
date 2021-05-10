@@ -6,6 +6,7 @@ use App\Http\Requests\AuthorPostRequest;
 use App\Http\Resources\AuthorResource;
 use App\Http\Resources\AuthorResourceCollection;
 use App\Models\Author;
+use App\Models\Book;
 use Illuminate\Http\Request;
 
 class AuthorController extends Controller
@@ -28,7 +29,24 @@ class AuthorController extends Controller
      */
     public function store(AuthorPostRequest $request)
     {
-        return new AuthorResource(Author::create($request->all()));
+        $authorInput = [
+            'first_name' => $request->input('first_name'),
+            'last_name' => $request->input('last_name'),
+            'age' => $request->input('age'),
+            'address' => $request->input('address'),
+        ];
+
+        $booksInput = collect($request->input('books'))->map(function ($book, $key) {
+            return new Book([
+                'name' => $book['name'],
+                'release_date' => $book['release_date']
+            ]);
+        });
+
+        $author = Author::create($authorInput);
+        $author->books()->saveMany($booksInput);
+        $author['books'] = $author->books;
+        return new AuthorResource($author);
     }
 
     /**

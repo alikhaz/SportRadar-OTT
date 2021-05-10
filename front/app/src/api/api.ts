@@ -15,7 +15,9 @@ export type Book = {
   author_id: number;
 };
 
-type BookInput = Omit<Book, "id">;
+type AuthorInput = Omit<Author, "id"> & {
+  books: Omit<Book, "id" | "author_id">[];
+};
 
 type WithData<T> = {
   data: T;
@@ -46,12 +48,17 @@ export const getBooks = (): Promise<Book[]> =>
     .then((response): Promise<WithData<Book[]>> => response.json())
     .then(getData);
 
-export const AddBook = (book: BookInput): Promise<Book> =>
-  fetch(apiEndpoint + "/books", {
+export const addAuthor = (
+  author: AuthorInput
+): Promise<Author & { books: Book[] }> =>
+  fetch(apiEndpoint + "/authors", {
     method: "post",
     headers,
-    body: JSON.stringify(book),
+    body: JSON.stringify(author),
   })
     .then(handleError)
-    .then((response): Promise<WithData<Book>> => response.json())
+    .then(
+      (response): Promise<WithData<Author & { books: Book[] }>> =>
+        response.json()
+    )
     .then(getData);

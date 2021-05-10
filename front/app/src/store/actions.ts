@@ -1,6 +1,6 @@
 import { ActionTree } from "vuex";
 import { mapAuthor, mapBook } from "./helpers";
-import { Book, State } from "./types";
+import { Author, Book, State } from "./types";
 import * as api from "@/api";
 
 export const actions: ActionTree<State, State> = {
@@ -12,19 +12,34 @@ export const actions: ActionTree<State, State> = {
     const books = await api.getBooks();
     context.commit("setBooks", books.map(mapBook));
   },
-  async addBook(
+  async addAuthor(
     { commit, state },
-    { authorId, name, releaseDate }: Omit<Book, "id">
+    {
+      firstName,
+      lastName,
+      address,
+      books,
+      age,
+    }: Omit<Author & { books: Omit<Book, "id" | "authorId">[] }, "id">
   ) {
     commit("setLoading", true);
     commit("emptyErrorMessage");
     try {
-      const addedBook = await api.AddBook({
-        author_id: authorId,
-        name,
-        release_date: releaseDate,
+      const addedAuthor = await api.addAuthor({
+        first_name: firstName,
+        last_name: lastName,
+        address,
+        age,
+        books: books.map((book) => ({
+          name: book.name,
+          release_date: book.releaseDate,
+        })),
       });
-      commit("setBooks", [...(state.books || []), mapBook(addedBook)]);
+      commit("setAuthors", [...(state.authors || []), mapAuthor(addedAuthor)]);
+      commit("setBooks", [
+        ...(state.books || []),
+        ...addedAuthor.books.map(mapBook),
+      ]);
       commit("setLoading", false);
     } catch (error) {
       commit("setErrorMessage", "An error occurred, please try again.");

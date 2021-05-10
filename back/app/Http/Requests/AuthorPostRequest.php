@@ -17,11 +17,20 @@ class AuthorPostRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
             'first_name' => 'required|string',
-            'last_ame' => 'required|string',
-            'age' => 'required|number'
+            'last_name' => 'required|string',
+            'age' => 'required|int',
+            "address" => 'required|string',
+            'books' => 'required|array|min:1',
         ];
+
+        foreach ($this->request->get('books') as $key => $val) {
+            $rules['books.' . $key . '.name'] = 'required|string';
+            $rules['books.' . $key . '.release_date'] = 'required|date_format:Y-m-d';
+        };
+
+        return $rules;
     }
 
     /**

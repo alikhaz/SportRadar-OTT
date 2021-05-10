@@ -2,7 +2,12 @@
 <template>
   <div class="row">
     <div class="col-12">
-      <p>Authors:</p>
+      <p>
+        Authors:
+        <button type="button" class="btn btn-link" v-on:click="refresh">
+          Refresh
+        </button>
+      </p>
       <table class="table table-striped table-bordered authors-list">
         <thead>
           <tr>
